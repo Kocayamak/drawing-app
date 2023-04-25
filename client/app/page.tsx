@@ -1,6 +1,7 @@
 "use client";
 
 import { useDraw } from "@/hooks/useDraw";
+import { drawLine } from "@/utils/drawLine";
 import { FC, useState } from "react";
 import { ChromePicker } from "react-color";
 import { io } from "socket.io-client";
@@ -12,14 +13,12 @@ interface PageProps {}
 
 const Page: FC<PageProps> = ({}) => {
   const [color, setColor] = useState<string>("#000");
-  const { canvasRef, onMouseDown, clear } = useDraw(drawLine);
+  const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
-  function drawLine({ prevPoint, currentPoint, ctx }: Draw) {
-
-  }
 
   function createLine({prevPoint , currentPoint, ctx} : Draw){
-
+    socket.emit('draw-line', ({prevPoint, currentPoint, color}));
+    drawLine({prevPoint, currentPoint, ctx, color});
   }
 
   return (

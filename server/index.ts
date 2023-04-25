@@ -20,7 +20,16 @@ type DrawLine = {
 }
 
 io.on('connection', (socket: Socket) => {
-    console.log("New connection");
+    console.log('a user connected');
+    
+    socket.on('client-ready' , () => {
+        socket.broadcast.emit('get-canvas-state');
+    })
+
+    socket.on('canvas-state' , (canvasState : string) => {
+        socket.broadcast.emit('canvas-state-from-server', canvasState);
+    })
+
     socket.on('draw-line' , ({prevPoint, currentPoint, color} : DrawLine) => {
         socket.broadcast.emit('draw-line', {prevPoint, currentPoint, color});
     })

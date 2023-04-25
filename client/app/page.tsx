@@ -23,6 +23,23 @@ const Page: FC<PageProps> = ({}) => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
 
+    socket.emit("client-ready");
+
+    socket.on("get-canvas-state", () => {
+      if (!canvasRef?.current?.toDataURL()) return;
+
+      socket.emit("canvas-state", canvasRef.current.toDataURL());
+    });
+
+    socket.on("canvas-state-from-server", (canvasState: string) => {
+      const img = new Image();
+      img.src = canvasState;
+      img.onload = () => {
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0);
+      };
+    });
+
     socket.on(
       "draw-line",
       ({ prevPoint, currentPoint, color }: DrawLineProps) => {
@@ -30,8 +47,14 @@ const Page: FC<PageProps> = ({}) => {
         drawLine({ prevPoint, currentPoint, ctx, color });
       }
     );
-
     socket.on("clear", clear);
+
+    return () => {
+      socket.off("get-canvas-state");
+      socket.off("canvas-state-from-server");
+      socket.off("draw-line");
+      socket.off("clear");
+    };
   }, [canvasRef]);
 
   function createLine({ prevPoint, currentPoint, ctx }: Draw) {

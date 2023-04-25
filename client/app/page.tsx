@@ -2,12 +2,11 @@
 
 import { useDraw } from "@/hooks/useDraw";
 import { drawLine } from "@/utils/drawLine";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001");
-
 
 interface PageProps {}
 
@@ -15,10 +14,29 @@ const Page: FC<PageProps> = ({}) => {
   const [color, setColor] = useState<string>("#000");
   const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
+  type DrawLineProps = {
+    prevPoint: Point | null;
+    currentPoint: Point;
+    color: string;
+  };
 
-  function createLine({prevPoint , currentPoint, ctx} : Draw){
-    socket.emit('draw-line', ({prevPoint, currentPoint, color}));
-    drawLine({prevPoint, currentPoint, ctx, color});
+  useEffect(() => {
+    const ctx = canvasRef.current?.getContext("2d");
+
+    socket.on(
+      "draw-line",
+      ({ prevPoint, currentPoint, color }: DrawLineProps) => {
+        if (!ctx) return;
+        drawLine({ prevPoint, currentPoint, ctx, color });
+      }
+    );
+
+    socket.on("clear", clear);
+  }, [canvasRef]);
+
+  function createLine({ prevPoint, currentPoint, ctx }: Draw) {
+    socket.emit("draw-line", { prevPoint, currentPoint, color });
+    drawLine({ prevPoint, currentPoint, ctx, color });
   }
 
   return (
@@ -28,7 +46,7 @@ const Page: FC<PageProps> = ({}) => {
         <button
           type="button"
           className="p-2 rounded-md border border-black"
-          onClick={clear}
+          onClick={() => socket.emit("clear")}
         >
           Panoyu Temizle
         </button>

@@ -16,7 +16,7 @@ type Point = {x : Number , y: Number}
 type DrawLine = {
     prevPoint : Point | null,
     currentPoint : Point,
-    color : String
+    color : string
 }
 
 io.on('connection', (socket: Socket) => {
@@ -24,6 +24,8 @@ io.on('connection', (socket: Socket) => {
     socket.on('draw-line' , ({prevPoint, currentPoint, color} : DrawLine) => {
         socket.broadcast.emit('draw-line', {prevPoint, currentPoint, color});
     })
+
+    socket.on('clear' , () => io.emit('clear'));
 });
 
 server.listen(3001, () => {

@@ -3,6 +3,10 @@
 import { useDraw } from "@/hooks/useDraw";
 import { FC, useState } from "react";
 import { ChromePicker } from "react-color";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3001");
+
 
 interface PageProps {}
 
@@ -11,23 +15,11 @@ const Page: FC<PageProps> = ({}) => {
   const { canvasRef, onMouseDown, clear } = useDraw(drawLine);
 
   function drawLine({ prevPoint, currentPoint, ctx }: Draw) {
-    const { x: currX, y: currY } = currentPoint;
-    const lineColor = color;
-    const lineWidth = 5;
 
-    let startPoint = prevPoint ?? currentPoint;
+  }
 
-    ctx.beginPath();
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = lineColor;
-    ctx.moveTo(startPoint.x, startPoint.y);
-    ctx.lineTo(currX, currY);
-    ctx.stroke();
+  function createLine({prevPoint , currentPoint, ctx} : Draw){
 
-    ctx.fillStyle = lineColor;
-    ctx.beginPath();
-    ctx.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI);
-    ctx.fill();
   }
 
   return (
